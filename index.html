@@ -246,6 +246,17 @@
     font-weight: 500;
   }
 
+  .typewriter::after {
+    content: '';
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 0.05em;
+    animation: blink 1s steps(1) infinite;
+  }
+
 
   .hero-cta {
     display: inline-flex;
@@ -785,7 +796,7 @@
     </h1>
 
     <p class="hero-tagline">
-      Serving <strong>the world's best gamer-creators</strong>.
+      <span class="typewriter"></span>
     </p>
 
     <a href="https://discord.gg/ggtSAFmg" class="hero-cta">contact</a>
@@ -945,5 +956,64 @@
 
 </div>
 
+<script>
+  const el = document.querySelector('.typewriter');
+  const prefix = 'Serving the world\'s ';
+  const rejects = ['biggest', 'most popular'];
+  const final = 'best';
+  const suffix = ' gamer-creators.';
+
+  const typeSpeed = 60;
+  const deleteSpeed = 40;
+  const pauseBeforeDelete = 400;
+  const pauseAfterDelete = 200;
+
+  let current = '';
+
+  function render(base, bold) {
+    if (bold) {
+      el.innerHTML = base.slice(0, prefix.length) + '<strong>' + base.slice(prefix.length) + '</strong>';
+    } else {
+      el.innerHTML = base;
+    }
+  }
+
+  async function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  async function typeText(text) {
+    for (let i = 0; i < text.length; i++) {
+      current += text[i];
+      render(current, false);
+      await sleep(typeSpeed);
+    }
+  }
+
+  async function deleteChars(count) {
+    for (let i = 0; i < count; i++) {
+      current = current.slice(0, -1);
+      render(current, false);
+      await sleep(deleteSpeed);
+    }
+  }
+
+  async function run() {
+    await sleep(600);
+    await typeText(prefix);
+
+    for (const word of rejects) {
+      await typeText(word);
+      await sleep(pauseBeforeDelete);
+      await deleteChars(word.length);
+      await sleep(pauseAfterDelete);
+    }
+
+    await typeText(final + suffix);
+    render(prefix + final + suffix, true);
+  }
+
+  run();
+</script>
 </body>
 </html>
