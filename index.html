@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engine Room Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep:        oklch(0.95 0.018 78);
+    --bg-surface:     oklch(0.925 0.022 76);
+    --bg-raised:      oklch(0.91 0.025 74);
+    --bg-hover:       oklch(0.895 0.028 73);
+
+    --accent:         oklch(0.42 0.10 45);
+    --accent-dim:     oklch(0.50 0.08 48);
+    --accent-subtle:  oklch(0.55 0.06 52);
+    --accent-glow:    oklch(0.42 0.10 45 / 0.10);
+
+    --olive:          oklch(0.45 0.07 145);
+    --olive-dim:      oklch(0.52 0.06 148);
+    --olive-subtle:   oklch(0.62 0.04 150);
+
+    --text-primary:   oklch(0.25 0.04 55);
+    --text-secondary: oklch(0.42 0.035 60);
+    --text-muted:     oklch(0.50 0.03 65);
+
+    --border:         oklch(0.84 0.025 72);
+    --border-focus:   oklch(0.70 0.04 60);
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+
+    --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.8125rem);
+    --text-sm:   clamp(0.8125rem, 0.75rem + 0.3vw, 0.9375rem);
+    --text-base: clamp(1rem, 0.925rem + 0.375vw, 1.125rem);
+    --text-lg:   clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    --text-xl:   clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
+    --text-2xl:  clamp(1.75rem, 1.35rem + 1.75vw, 2.75rem);
+    --text-3xl:  clamp(2.25rem, 1.6rem + 2.75vw, 3.75rem);
+  }
+
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-base);
+    line-height: 1.7;
+    color: var(--text-primary);
+    background-color: var(--bg-deep);
+    overflow-x: hidden;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  a:hover { color: var(--text-primary); }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: oklch(0.42 0.10 45 / 0.18);
+    color: var(--text-primary);
+  }
+
+  /* Paper texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  .page-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  /* ========================================
+     TOP BAR
+     ======================================== */
+  .top-bar {
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 0.02em;
+  }
+
+  .top-bar-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .top-bar-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+  }
+
+  .top-bar-dot--red    { background: oklch(0.60 0.08 30); }
+  .top-bar-dot--yellow { background: oklch(0.68 0.07 80); }
+  .top-bar-dot--green  { background: oklch(0.58 0.06 148); }
+
+  /* ========================================
+     NAV
+     ======================================== */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    gap: 1rem;
+  }
+
+  .nav-brand {
+    font-weight: 700;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .nav-brand span {
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.75rem;
+    list-style: none;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a:hover {
+    color: var(--accent);
+  }
+
+  .nav-links a::before {
+    content: '>';
+    margin-right: 0.35em;
+    color: var(--accent-subtle);
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a:hover::before {
+    color: var(--accent);
+  }
+
+  /* ========================================
+     HERO
+     ======================================== */
+  .hero {
+    padding: clamp(4rem, 8vw, 7rem) 0 clamp(3rem, 5vw, 4.5rem);
+  }
+
+  .hero-prompt {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+    margin-bottom: 1.5rem;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+
+  .hero-prompt-symbol {
+    color: var(--accent);
+    font-weight: 600;
+    user-select: none;
+  }
+
+  .hero-prompt-path {
+    color: var(--olive-dim);
+  }
+
+  .hero-title {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+  }
+
+  .hero-title .highlight {
+    color: var(--accent);
+  }
+
+  .hero-tagline {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 42ch;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-tagline strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.85rem 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--bg-deep);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  .hero-cta:hover {
+    background: oklch(0.36 0.11 42);
+    transform: translateY(-1px);
+    color: var(--bg-deep);
+  }
+
+  .hero-cta:active {
+    transform: translateY(0);
+  }
+
+  .hero-cta::before {
+    content: '$';
+    opacity: 0.5;
+    font-weight: 400;
+  }
+
+  /* ========================================
+     SECTIONS
+     ======================================== */
+  .section {
+    padding: clamp(2.5rem, 5vw, 4rem) 0;
+  }
+
+  .section + .section {
+    border-top: 1px solid var(--border);
+  }
+
+  .section-header {
+    margin-bottom: 2rem;
+  }
+
+  .section-comment {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-style: italic;
+  }
+
+  .section-comment::before {
+    content: '// ';
+    color: var(--accent-subtle);
+    font-style: normal;
+  }
+
+  .section-title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  /* ========================================
+     WHAT WE DO — services grid
+     ======================================== */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .service-item {
+    padding: 1.5rem;
+    background: var(--bg-surface);
+    transition: background 0.15s ease;
+  }
+
+  .service-item:hover {
+    background: var(--bg-raised);
+  }
+
+  .service-label {
+    font-size: var(--text-xs);
+    color: var(--accent-dim);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .service-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+  }
+
+  .service-desc {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  /* ========================================
+     HOW IT WORKS — terminal output
+     ======================================== */
+  .process-terminal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .process-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    background: var(--bg-raised);
+    border-bottom: 1px solid var(--border);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .process-titlebar-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .process-titlebar-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .process-body {
+    padding: 1.25rem 1.5rem;
+    font-size: var(--text-sm);
+    line-height: 1.8;
+  }
+
+  .process-step {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 0 0.75em;
+    align-items: baseline;
+    padding: 0.4rem 0.5rem;
+    margin: 0 -0.5rem;
+    border-radius: var(--radius-sm);
+    transition: background 0.1s ease;
+  }
+
+  .process-step:hover {
+    background: var(--bg-hover);
+  }
+
+  .process-step-num {
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .process-step-sep {
+    color: var(--border-focus);
+    user-select: none;
+  }
+
+  .process-step-text {
+    color: var(--text-primary);
+  }
+
+  .process-step-text .dim {
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  .process-prompt {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+  }
+
+  .process-prompt-symbol {
+    color: var(--accent);
+  }
+
+  .vim-statusbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.35rem 1rem;
+    background: var(--bg-raised);
+    border-top: 1px solid var(--border);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .vim-mode {
+    color: var(--olive);
+    font-weight: 600;
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    animation: blink 1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ========================================
+     FOR CREATORS — who we work with
+     ======================================== */
+  .creators-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .creator-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: background 0.15s ease;
+  }
+
+  .creator-card:hover {
+    background: var(--bg-raised);
+  }
+
+  .creator-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--bg-deep);
+  }
+
+  .creator-avatar--1 { background: linear-gradient(135deg, var(--accent), var(--olive)); }
+  .creator-avatar--2 { background: linear-gradient(135deg, var(--olive), var(--accent-dim)); }
+  .creator-avatar--3 { background: linear-gradient(135deg, var(--accent-dim), oklch(0.45 0.07 200)); }
+
+  .creator-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .creator-name {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+  }
+
+  .creator-detail {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .creator-detail span {
+    color: var(--olive-dim);
+  }
+
+  /* ========================================
+     STAT ROW
+     ======================================== */
+  .stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+
+  .stat-value {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: var(--text-sm);
+  }
+
+  .stat-label {
+    color: var(--text-muted);
+  }
+
+  .stat-sep {
+    color: var(--border);
+    user-select: none;
+  }
+
+  /* ========================================
+     CTA
+     ======================================== */
+  .cta-section {
+    text-align: center;
+    padding: clamp(3rem, 6vw, 5rem) 0;
+  }
+
+  .cta-command {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: 1.75rem;
+  }
+
+  .cta-command .symbol {
+    color: var(--accent);
+  }
+
+  .cta-heading {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+
+  .cta-sub {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: 2.5rem;
+    line-height: 1.65;
+    max-width: 40ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.85rem 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--bg-deep);
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  .cta-button:hover {
+    background: oklch(0.36 0.11 42);
+    transform: translateY(-1px);
+  }
+
+  .cta-button:active {
+    transform: translateY(0);
+  }
+
+  .cta-button::before {
+    content: '$';
+    opacity: 0.5;
+    font-weight: 400;
+  }
+
+  .cta-note {
+    margin-top: 1.25rem;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  /* ========================================
+     FOOTER
+     ======================================== */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+  }
+
+  .footer-status {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--olive);
+    animation: pulse-dot 2s ease infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .footer a {
+    color: var(--text-muted);
+  }
+
+  .footer a:hover {
+    color: var(--accent);
+  }
+
+  /* ========================================
+     RESPONSIVE
+     ======================================== */
+  @media (max-width: 600px) {
+    .nav {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .nav-links {
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero {
+      padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(2rem, 4vw, 3rem);
+    }
+
+    .hero-title {
+      font-size: var(--text-2xl);
+    }
+
+    .stat-row {
+      flex-direction: column;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .stat-sep {
+      display: none;
+    }
+
+    .top-bar {
+      display: none;
+    }
+
+    .services-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .process-step {
+      grid-template-columns: auto 1fr;
+    }
+
+    .process-step-sep {
+      display: none;
+    }
+
+    .creator-card {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .footer {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .footer-left {
+      justify-content: center;
+    }
+
+    .cta-heading {
+      font-size: var(--text-xl);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-container">
+
+
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-prompt" aria-hidden="true">
+      <span class="hero-prompt-symbol">$</span>
+      <span>era describe</span>
+      <span class="hero-prompt-path">--agency</span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="highlight">Engine Room</span> Agency
+    </h1>
+
+    <p class="hero-tagline">
+      Serving <strong>the world's best gamer-creators</strong>.
+    </p>
+
+    <a href="https://discord.gg/ggtSAFmg" class="hero-cta">contact</a>
+  </section>
+
+  <!-- Stats -->
+  <div id="pillars" class="stat-row" role="list" aria-label="Agency stats">
+    <div class="stat-item" role="listitem">
+      <span class="stat-value">Growth</span>
+    </div>
+    <span class="stat-sep" aria-hidden="true">|</span>
+    <div class="stat-item" role="listitem">
+      <span class="stat-value">Intelligence</span>
+    </div>
+    <span class="stat-sep" aria-hidden="true">|</span>
+    <div class="stat-item" role="listitem">
+      <span class="stat-value">Technology</span>
+    </div>
+    <span class="stat-sep" aria-hidden="true">|</span>
+    <div class="stat-item" role="listitem">
+      <span class="stat-value">Community</span>
+    </div>
+    <span class="stat-sep" aria-hidden="true">|</span>
+    <div class="stat-item" role="listitem">
+      <span class="stat-value">Experiences</span>
+    </div>
+  </div>
+
+  <!-- What We Do -->
+  <section class="section" id="services">
+    <div class="section-header">
+      <p class="section-comment">intelligence + technology = explosive growth</p>
+      <h2 class="section-title">What We Build</h2>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-item">
+        <div class="service-label">Technology</div>
+        <div class="service-title">Branded Experiences</div>
+        <div class="service-desc">Right experience. Built fast. Unmistakably you. We figure out what your community needs, ship it quickly, and make sure your brand is the loudest thing in the room.</div>
+      </div>
+      <div class="service-item">
+        <div class="service-label">Intelligence</div>
+        <div class="service-title">Data That Drives Decisions</div>
+        <div class="service-desc">We start measuring before we ever jump on Discord. A mix of internal and external tools that x-ray your brand top to bottom — and we share every report with you. No secrets.</div>
+      </div>
+      <div class="service-item">
+        <div class="service-label">Growth</div>
+        <div class="service-title">Explosive, Not Incremental</div>
+        <div class="service-desc">Intelligence tells us where the leverage is. Technology lets us pull the lever. The result: growth that snowballs — not growth that melts.</div>
+      </div>
+      <div class="service-item">
+        <div class="service-label">Technology</div>
+        <div class="service-title">Discord, Twitch, Game APIs</div>
+        <div class="service-desc">Deep integrations with the tools your community already lives in. Auth, events, match data — all wired together.</div>
+      </div>
+      <div class="service-item">
+        <div class="service-label">Technology</div>
+        <div class="service-title">Built Like It Matters</div>
+        <div class="service-desc">Stable, scalable, obsessively monitored. When your community shows up, the tech has to be there. Period. We don't roll dice with your reputation or with ours.</div>
+      </div>
+      <div class="service-item">
+        <div class="service-label">Growth</div>
+        <div class="service-title">Growth Is Everything</div>
+        <div class="service-desc">We only sign creators when we can see something compelling, eyeball-grabbing, community-igniting, and of course... culturally aligned on the other side.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section" id="process">
+    <div class="section-header">
+      <p class="section-comment">vim process.log</p>
+      <h2 class="section-title">How We Work</h2>
+    </div>
+
+    <div class="process-terminal" role="list" aria-label="Process steps">
+      <div class="process-titlebar" aria-hidden="true">
+        <div class="process-titlebar-dots">
+          <div class="process-titlebar-dot"></div>
+          <div class="process-titlebar-dot"></div>
+          <div class="process-titlebar-dot"></div>
+        </div>
+        <span>process.log [+] — VIM</span>
+      </div>
+      <div class="process-body">
+        <div class="process-step" role="listitem">
+          <span class="process-step-num">00</span>
+          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
+          <span class="process-step-text">We review you <span class="dim">// application or referral</span></span>
+        </div>
+        <div class="process-step" role="listitem">
+          <span class="process-step-num">01</span>
+          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
+          <span class="process-step-text">You review us <span class="dim">// do you like us? our terms?</span></span>
+        </div>
+        <div class="process-step" role="listitem">
+          <span class="process-step-num">02</span>
+          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
+          <span class="process-step-text">We join your world <span class="dim">// discord, twitch, everything</span></span>
+        </div>
+        <div class="process-step" role="listitem">
+          <span class="process-step-num">03</span>
+          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
+          <span class="process-step-text">We decide the experience <span class="dim">// together, not for you</span></span>
+        </div>
+        <div class="process-step" role="listitem">
+          <span class="process-step-num">04</span>
+          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
+          <span class="process-step-text">We launch <span class="dim">// promote, execute, measure</span></span>
+        </div>
+        <div class="process-step" role="listitem">
+          <span class="process-step-num">05</span>
+          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
+          <span class="process-step-text">We iterate <span class="dim">// look back before looking forward</span><span class="cursor-blink"></span></span>
+        </div>
+      </div>
+      <div class="vim-statusbar">
+        <span><span class="vim-mode">-- NORMAL --</span></span>
+        <span>process.log 6L, 248B</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CTA -->
+  <section class="section cta-section" id="contact">
+    <div class="cta-command" aria-hidden="true">
+      <span class="symbol">$</span> era grow --creator
+    </div>
+
+    <h2 class="cta-heading">
+      Let's build something<br>they'll talk about.
+    </h2>
+
+    <p class="cta-sub">
+      Intelligence and technology for gaming creators who are ready for explosive growth.
+    </p>
+
+    <a href="https://discord.gg/ggtSAFmg" class="cta-button" aria-label="Contact Engine Room Agency">
+      contact
+    </a>
+
+    <p class="cta-note">Selective intake. We'll respond within 48 hours.</p>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-left">
+      <div class="footer-status" aria-label="System online"></div>
+      <span>era v0.1.0 // engine-room-agency.com</span>
+    </div>
+    <div>
+      <a href="#">terms</a> &middot; <a href="#">privacy</a> &middot; <a href="#">discord</a>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>
