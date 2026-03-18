@@ -6,55 +6,82 @@
 <title>Engine Room Agency</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-deep:        oklch(0.95 0.018 78);
-    --bg-surface:     oklch(0.925 0.022 76);
-    --bg-raised:      oklch(0.91 0.025 74);
-    --bg-hover:       oklch(0.895 0.028 73);
+    --bg-void:    #0b0b0e;
+    --bg-base:    #0e0e12;
+    --bg-surface: #121216;
+    --bg-raised:  #17171c;
+    --bg-hover:   #1c1c22;
 
-    --accent:         oklch(0.42 0.10 45);
-    --accent-dim:     oklch(0.50 0.08 48);
-    --accent-subtle:  oklch(0.55 0.06 52);
-    --accent-glow:    oklch(0.42 0.10 45 / 0.10);
+    --accent:       oklch(0.65 0.15 155);
+    --accent-dim:   oklch(0.50 0.10 155);
+    --accent-muted: oklch(0.32 0.06 155);
+    --accent-glow:  oklch(0.65 0.15 155 / 0.06);
 
-    --olive:          oklch(0.45 0.07 145);
-    --olive-dim:      oklch(0.52 0.06 148);
-    --olive-subtle:   oklch(0.62 0.04 150);
+    --text-primary:   #e8e8ec;
+    --text-secondary: #8a8a96;
+    --text-muted:     #4a4a56;
 
-    --text-primary:   oklch(0.25 0.04 55);
-    --text-secondary: oklch(0.42 0.035 60);
-    --text-muted:     oklch(0.50 0.03 65);
+    --border:     rgba(255,255,255,0.08);
+    --border-lit: rgba(255,255,255,0.14);
 
-    --border:         oklch(0.84 0.025 72);
-    --border-focus:   oklch(0.70 0.04 60);
-
-    --radius-sm: 4px;
-    --radius-md: 6px;
-
-    --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.8125rem);
-    --text-sm:   clamp(0.8125rem, 0.75rem + 0.3vw, 0.9375rem);
-    --text-base: clamp(1rem, 0.925rem + 0.375vw, 1.125rem);
-    --text-lg:   clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
-    --text-xl:   clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
-    --text-2xl:  clamp(1.75rem, 1.35rem + 1.75vw, 2.75rem);
-    --text-3xl:  clamp(2.25rem, 1.6rem + 2.75vw, 3.75rem);
+    --mono: 'Geist Mono', 'JetBrains Mono', monospace;
+    --sans: 'Space Grotesk', system-ui, sans-serif;
   }
 
-  *, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   html {
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    font-size: 16px;
   }
 
+  body {
+    font-family: var(--sans);
+    color: var(--text-primary);
+    background: var(--bg-void);
+    overflow-x: hidden;
+    line-height: 1.5;
+  }
+
+  ::selection { background: oklch(0.65 0.15 155 / 0.25); }
+
+  /* ── Scanline overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.008) 2px,
+      rgba(255,255,255,0.008) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Grid underlay ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body > * { position: relative; z-index: 1; }
+
+  /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after {
@@ -62,417 +89,254 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+    .reveal { opacity: 1 !important; transform: none !important; }
+    .ticker-track { animation: none !important; }
   }
 
-  body {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: var(--text-base);
-    line-height: 1.7;
-    color: var(--text-primary);
-    background-color: var(--bg-deep);
-    overflow-x: hidden;
-  }
-
-  a {
-    color: var(--accent);
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-
-  a:hover { color: var(--text-primary); }
-
-  a:focus-visible,
-  button:focus-visible {
-    outline: 2px solid var(--accent);
+  /* ── Focus ── */
+  a:focus-visible, button:focus-visible {
+    outline: 1px solid var(--accent);
     outline-offset: 2px;
   }
 
-  ::selection {
-    background: oklch(0.42 0.10 45 / 0.18);
-    color: var(--text-primary);
+  /* ── Scroll reveal ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-d1 { transition-delay: 0.06s; }
+  .reveal-d2 { transition-delay: 0.12s; }
+  .reveal-d3 { transition-delay: 0.18s; }
+  .reveal-d4 { transition-delay: 0.24s; }
+  .reveal-d5 { transition-delay: 0.30s; }
+  .reveal-d6 { transition-delay: 0.36s; }
 
-  /* Paper texture */
-  body::after {
+  /* ── HUD corners ── */
+  .hud { position: relative; }
+  .hud::before, .hud::after {
     content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-    background-size: 256px 256px;
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: var(--accent-dim);
+    border-style: solid;
     pointer-events: none;
-    z-index: 9999;
-    opacity: 0.5;
+    opacity: 0.4;
+    transition: opacity 0.2s ease;
+  }
+  .hud::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+  .hud::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+  .hud:hover::before, .hud:hover::after { opacity: 0.9; }
+
+  /* ── Pulse keyframe ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 
-  .page-container {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 clamp(1.25rem, 4vw, 2.5rem);
+  /* ── Radar ping ── */
+  .radar-container {
+    position: fixed;
+    bottom: 3rem;
+    right: 3rem;
+    width: 120px;
+    height: 120px;
+    z-index: 2;
+    opacity: 0.12;
+    pointer-events: none;
   }
-
-  /* ========================================
-     TOP BAR
-     ======================================== */
-  .top-bar {
-    border-bottom: 1px solid var(--border);
-    padding: 0.75rem 0;
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    letter-spacing: 0.02em;
-  }
-
-  .top-bar-dots {
-    display: flex;
-    gap: 6px;
-  }
-
-  .top-bar-dot {
-    width: 10px;
-    height: 10px;
+  .radar-ring {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--accent);
     border-radius: 50%;
-    border: 1px solid var(--border);
+  }
+  .radar-ring:nth-child(2) { inset: 20px; }
+  .radar-ring:nth-child(3) { inset: 40px; }
+  .radar-cross-h, .radar-cross-v {
+    position: absolute;
+    background: var(--accent);
+  }
+  .radar-cross-h {
+    width: 100%; height: 1px;
+    top: 50%; left: 0;
+  }
+  .radar-cross-v {
+    width: 1px; height: 100%;
+    left: 50%; top: 0;
+  }
+  @keyframes radarSweep {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .radar-sweep {
+    position: absolute;
+    width: 50%;
+    height: 1px;
+    top: 50%;
+    left: 50%;
+    transform-origin: left center;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    animation: radarSweep 4s linear infinite;
+  }
+  .radar-dot {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
   }
 
-  .top-bar-dot--red    { background: oklch(0.60 0.08 30); }
-  .top-bar-dot--yellow { background: oklch(0.68 0.07 80); }
-  .top-bar-dot--green  { background: oklch(0.58 0.06 148); }
+  /* ══════════════════════════════════════
+     PAGE WRAPPER
+     ══════════════════════════════════════ */
+  .page {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 2rem);
+  }
 
-  /* ========================================
-     NAV
-     ======================================== */
+  /* ══════════════════════════════════════
+     NAV — system status bar
+     ══════════════════════════════════════ */
   .nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem 0;
-    gap: 1rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .nav-brand {
-    font-weight: 700;
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .nav-brand span {
-    color: var(--accent);
-  }
-
-  .nav-links {
     display: flex;
-    gap: 1.75rem;
-    list-style: none;
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .nav-links a {
-    color: var(--text-muted);
-    transition: color 0.15s ease;
-  }
-
-  .nav-links a:hover {
-    color: var(--accent);
-  }
-
-  .nav-links a::before {
-    content: '>';
-    margin-right: 0.35em;
-    color: var(--accent-subtle);
-    transition: color 0.15s ease;
-  }
-
-  .nav-links a:hover::before {
-    color: var(--accent);
-  }
-
-  /* ========================================
-     HERO
-     ======================================== */
-  .hero {
-    padding: clamp(4rem, 8vw, 7rem) 0 clamp(3rem, 5vw, 4.5rem);
-  }
-
-  .hero-prompt {
-    display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 0.5em;
-    margin-bottom: 1.5rem;
-    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .nav-mark {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  .nav-brand em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .nav-meta {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+  }
+
+  .nav-meta a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .nav-meta a:hover { color: var(--accent); }
+
+  .nav-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
     color: var(--text-muted);
   }
 
-  .hero-prompt-symbol {
-    color: var(--accent);
-    font-weight: 600;
-    user-select: none;
+  .nav-status-dot {
+    width: 5px; height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2.5s ease infinite;
   }
 
-  .hero-prompt-path {
-    color: var(--olive-dim);
+  /* ══════════════════════════════════════
+     HERO — left-aligned, text scramble
+     ══════════════════════════════════════ */
+  .hero {
+    padding: clamp(4rem, 10vw, 8rem) 0 clamp(2.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 3rem;
+    align-items: end;
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .hero-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
   }
 
   .hero-title {
-    font-size: var(--text-3xl);
+    font-family: var(--sans);
+    font-size: clamp(2.75rem, 6vw, 5rem);
     font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    margin-bottom: 1.5rem;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+
+  .hero-title .accent { color: var(--accent); }
+
+  /* Scramble container */
+  .scramble-text {
+    font-family: var(--mono);
+    display: inline;
+  }
+  .scramble-text .char {
+    display: inline-block;
+    min-width: 0.6em;
+    transition: color 0.1s ease;
+  }
+  .scramble-text .char.resolving {
+    color: var(--accent);
+  }
+  .scramble-text .char.resolved {
     color: var(--text-primary);
   }
 
-  .hero-title .highlight {
-    color: var(--accent);
-  }
-
   .hero-tagline {
-    font-size: var(--text-lg);
+    font-family: var(--sans);
+    font-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
     color: var(--text-secondary);
-    font-weight: 300;
-    line-height: 1.6;
-    max-width: 42ch;
-    margin-bottom: 2.5rem;
+    line-height: 1.7;
+    max-width: 40ch;
   }
 
   .hero-tagline strong {
     color: var(--accent);
-    font-weight: 500;
-  }
-
-  .typewriter::after {
-    content: '';
-    display: inline-block;
-    width: 0.55em;
-    height: 1.1em;
-    background: var(--accent);
-    vertical-align: text-bottom;
-    margin-left: 0.05em;
-    animation: blink 1s steps(1) infinite;
-  }
-
-
-  .hero-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6em;
-    padding: 0.85rem 2rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--bg-deep);
-    background: var(--accent);
-    border: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    letter-spacing: 0.03em;
-    transition: background 0.15s ease, transform 0.1s ease;
-  }
-
-  .hero-cta:hover {
-    background: oklch(0.36 0.11 42);
-    transform: translateY(-1px);
-    color: var(--bg-deep);
-  }
-
-  .hero-cta:active {
-    transform: translateY(0);
-  }
-
-  .hero-cta::before {
-    content: '$';
-    opacity: 0.5;
-    font-weight: 400;
-  }
-
-  /* ========================================
-     SECTIONS
-     ======================================== */
-  .section {
-    padding: clamp(2.5rem, 5vw, 4rem) 0;
-  }
-
-  .section + .section {
-    border-top: 1px solid var(--border);
-  }
-
-  .section-header {
-    margin-bottom: 2rem;
-  }
-
-  .section-comment {
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    font-style: italic;
-  }
-
-  .section-comment::before {
-    content: '// ';
-    color: var(--accent-subtle);
-    font-style: normal;
-  }
-
-  .section-title {
-    font-size: var(--text-xl);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-  }
-
-  /* ========================================
-     WHAT WE DO — services grid
-     ======================================== */
-  .services-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-  }
-
-  .service-item {
-    padding: 1.5rem;
-    background: var(--bg-surface);
-    transition: background 0.15s ease;
-  }
-
-  .service-item:hover {
-    background: var(--bg-raised);
-  }
-
-  .service-label {
-    font-size: var(--text-xs);
-    color: var(--accent-dim);
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .service-title {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.4rem;
-  }
-
-  .service-desc {
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-    line-height: 1.65;
-  }
-
-  /* ========================================
-     HOW IT WORKS — terminal output
-     ======================================== */
-  .process-terminal {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-  }
-
-  .process-titlebar {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.65rem 1rem;
-    background: var(--bg-raised);
-    border-bottom: 1px solid var(--border);
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-  }
-
-  .process-titlebar-dots {
-    display: flex;
-    gap: 5px;
-  }
-
-  .process-titlebar-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--border);
-  }
-
-  .process-body {
-    padding: 1.25rem 1.5rem;
-    font-size: var(--text-sm);
-    line-height: 1.8;
-  }
-
-  .process-step {
-    display: grid;
-    grid-template-columns: auto auto 1fr;
-    gap: 0 0.75em;
-    align-items: baseline;
-    padding: 0.4rem 0.5rem;
-    margin: 0 -0.5rem;
-    border-radius: var(--radius-sm);
-    transition: background 0.1s ease;
-  }
-
-  .process-step:hover {
-    background: var(--bg-hover);
-  }
-
-  .process-step-num {
-    color: var(--accent);
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  .process-step-sep {
-    color: var(--border-focus);
-    user-select: none;
-  }
-
-  .process-step-text {
-    color: var(--text-primary);
-  }
-
-  .process-step-text .dim {
-    color: var(--text-secondary);
-    font-weight: 300;
-  }
-
-  .process-prompt {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: var(--text-xs);
-  }
-
-  .process-prompt-symbol {
-    color: var(--accent);
-  }
-
-  .vim-statusbar {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.35rem 1rem;
-    background: var(--bg-raised);
-    border-top: 1px solid var(--border);
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
-  }
-
-  .vim-mode {
-    color: var(--olive);
     font-weight: 600;
   }
 
@@ -482,538 +346,964 @@
     height: 1.1em;
     background: var(--accent);
     vertical-align: text-bottom;
+    margin-left: 2px;
     animation: blink 1s steps(1) infinite;
   }
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  /* ========================================
-     FOR CREATORS — who we work with
-     ======================================== */
-  .creators-block {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .creator-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem 1.5rem;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    transition: background 0.15s ease;
-  }
-
-  .creator-card:hover {
-    background: var(--bg-raised);
-  }
-
-  .creator-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--text-lg);
-    font-weight: 700;
-    color: var(--bg-deep);
-  }
-
-  .creator-avatar--1 { background: linear-gradient(135deg, var(--accent), var(--olive)); }
-  .creator-avatar--2 { background: linear-gradient(135deg, var(--olive), var(--accent-dim)); }
-  .creator-avatar--3 { background: linear-gradient(135deg, var(--accent-dim), oklch(0.45 0.07 200)); }
-
-  .creator-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-  }
-
-  .creator-name {
-    font-weight: 600;
-    font-size: var(--text-sm);
-    color: var(--text-primary);
-  }
-
-  .creator-detail {
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-  }
-
-  .creator-detail span {
-    color: var(--olive-dim);
-  }
-
-  /* ========================================
-     STAT ROW
-     ======================================== */
-  .stat-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem 1.5rem;
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-    padding: 1.25rem 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.4em;
-  }
-
-  .stat-value {
-    color: var(--accent);
-    font-weight: 600;
-    font-size: var(--text-sm);
-  }
-
-  .stat-label {
-    color: var(--text-muted);
-  }
-
-  .stat-sep {
-    color: var(--border);
-    user-select: none;
-  }
-
-  /* ========================================
-     CTA
-     ======================================== */
-  .cta-section {
-    text-align: center;
-    padding: clamp(3rem, 6vw, 5rem) 0;
-  }
-
-  .cta-command {
+  .hero-cta {
     display: inline-flex;
     align-items: center;
-    gap: 0.5em;
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    margin-bottom: 1.75rem;
-  }
-
-  .cta-command .symbol {
-    color: var(--accent);
-  }
-
-  .cta-heading {
-    font-size: var(--text-2xl);
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.03em;
-    margin-bottom: 0.75rem;
-  }
-
-  .cta-sub {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-    margin-bottom: 2.5rem;
-    line-height: 1.65;
-    max-width: 40ch;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .cta-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6em;
-    padding: 0.85rem 2rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: var(--text-sm);
+    gap: 0.75em;
+    padding: 0.75rem 1.75rem;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
     font-weight: 600;
-    color: var(--bg-deep);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bg-void);
     background: var(--accent);
     border: none;
-    border-radius: var(--radius-sm);
+    text-decoration: none;
     cursor: pointer;
-    letter-spacing: 0.03em;
-    transition: background 0.15s ease, transform 0.1s ease;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.15s ease;
+    width: fit-content;
   }
-
-  .cta-button:hover {
-    background: oklch(0.36 0.11 42);
+  .hero-cta:hover {
     transform: translateY(-1px);
+    color: var(--bg-void);
+  }
+  .hero-cta:active { transform: translateY(0); }
+
+  /* ── Hero data panel ── */
+  .hero-panel {
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    overflow: hidden;
   }
 
-  .cta-button:active {
-    transform: translateY(0);
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .cta-button::before {
-    content: '$';
-    opacity: 0.5;
+  .panel-header .label { color: var(--accent-dim); }
+
+  .panel-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    transition: background 0.12s ease;
+    letter-spacing: 0.04em;
+  }
+  .panel-row:last-child { border-bottom: none; }
+  .panel-row:hover { background: var(--bg-hover); }
+
+  .panel-key {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .panel-val {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .panel-val .dim {
+    color: var(--text-muted);
     font-weight: 400;
   }
 
-  .cta-note {
-    margin-top: 1.25rem;
-    font-size: var(--text-xs);
-    color: var(--text-muted);
+  /* ══════════════════════════════════════
+     TICKER — horizontal data strip
+     ══════════════════════════════════════ */
+  .ticker {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--bg-base);
+    position: relative;
   }
 
-  /* ========================================
+  .ticker-track {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    white-space: nowrap;
+    animation: tickerScroll 30s linear infinite;
+    width: max-content;
+  }
+
+  @keyframes tickerScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.5rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .ticker-item .val {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .ticker-item .dot {
+    width: 4px; height: 4px;
+    background: var(--accent-dim);
+    border-radius: 50%;
+  }
+
+  .ticker-item .dot.live {
+    background: var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+
+  /* ══════════════════════════════════════
+     SERVICES — dense module grid
+     ══════════════════════════════════════ */
+  .section {
+    padding: clamp(3rem, 6vw, 5rem) 0;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 0.5625rem;
+    color: var(--accent-dim);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-title {
+    font-family: var(--sans);
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Module grid */
+  .mod-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .mod {
+    background: var(--bg-surface);
+    padding: 0.875rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    position: relative;
+  }
+
+  .mod:hover {
+    background: var(--bg-raised);
+  }
+
+  .mod-6 { grid-column: span 6; }
+  .mod-4 { grid-column: span 4; }
+  .mod-8 { grid-column: span 8; }
+  .mod-3 { grid-column: span 3; }
+  .mod-12 { grid-column: span 12; }
+
+  .mod-lg {
+    padding: 1.25rem 1.125rem;
+    min-height: 160px;
+    justify-content: flex-end;
+  }
+
+  /* Status indicator on modules */
+  .mod-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .mod-status-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+  }
+
+  .mod-status-dot.active {
+    background: var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+
+  .mod-tag {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    color: var(--accent-muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .mod-title {
+    font-family: var(--sans);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .mod-title-lg {
+    font-size: 1.125rem;
+  }
+
+  .mod-desc {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 48ch;
+  }
+
+  .mod-metric {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: auto;
+    padding-top: 0.5rem;
+  }
+
+  /* Feature module — has accent gradient hint */
+  .mod-feature {
+    position: relative;
+    overflow: hidden;
+  }
+  .mod-feature::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 40%; height: 40%;
+    background: radial-gradient(ellipse at bottom right, var(--accent-glow), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .mod-feature:hover::after { opacity: 1; }
+
+  /* ══════════════════════════════════════
+     PROCESS — mission sequence
+     ══════════════════════════════════════ */
+  .mission {
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .mission-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.5625rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--bg-raised);
+  }
+
+  .mission-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+
+  .mission-bar-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    animation: pulse 2s ease infinite;
+  }
+
+  /* Progress track */
+  .mission-progress {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0.375rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-base);
+  }
+
+  .mission-pip {
+    flex: 1;
+    height: 2px;
+    background: var(--accent-muted);
+    transition: background 0.3s ease;
+    position: relative;
+  }
+
+  .mission-pip.filled {
+    background: var(--accent);
+  }
+
+  .mission-pip + .mission-pip {
+    margin-left: 3px;
+  }
+
+  /* Steps grid */
+  .mission-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .mission-step {
+    background: var(--bg-surface);
+    padding: 1rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    transition: background 0.15s ease;
+  }
+
+  .mission-step:hover { background: var(--bg-raised); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .step-num {
+    font-family: var(--mono);
+    font-size: 0.5625rem;
+    color: var(--accent-dim);
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  .step-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent-muted);
+    transition: background 0.3s ease;
+  }
+
+  .mission-step:hover .step-dot { background: var(--accent); }
+
+  .step-title {
+    font-family: var(--sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .step-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .step-note {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: auto;
+    padding-top: 0.375rem;
+  }
+
+  .mission-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0.875rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg-raised);
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .mission-footer-status { color: var(--accent-dim); }
+
+  /* ══════════════════════════════════════
+     CTA
+     ══════════════════════════════════════ */
+  .cta-section {
+    padding: clamp(3.5rem, 8vw, 6rem) 0;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  .cta-heading {
+    font-family: var(--sans);
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+  }
+
+  .cta-heading .accent { color: var(--accent); }
+
+  .cta-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .cta-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75em;
+    padding: 0.75rem 1.75rem;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bg-void);
+    background: var(--accent);
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: fit-content;
+  }
+  .cta-btn:hover { transform: translateY(-1px); color: var(--bg-void); }
+
+  .cta-note {
+    font-family: var(--mono);
+    font-size: 0.5625rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ══════════════════════════════════════
      FOOTER
-     ======================================== */
+     ══════════════════════════════════════ */
   .footer {
     border-top: 1px solid var(--border);
-    padding: 2rem 0;
-    font-size: var(--text-xs);
-    color: var(--text-muted);
+    padding: 1rem 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.5625rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .footer-left {
     display: flex;
     align-items: center;
-    gap: 0.35em;
+    gap: 0.5em;
   }
 
-  .footer-status {
-    width: 6px;
-    height: 6px;
+  .footer-dot {
+    width: 4px; height: 4px;
     border-radius: 50%;
-    background: var(--olive);
-    animation: pulse-dot 2s ease infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    background: var(--accent);
+    animation: pulse 2.5s ease infinite;
   }
 
   .footer a {
     color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
   }
+  .footer a:hover { color: var(--accent); }
 
-  .footer a:hover {
-    color: var(--accent);
-  }
-
-  /* ========================================
+  /* ══════════════════════════════════════
      RESPONSIVE
-     ======================================== */
-  @media (max-width: 600px) {
-    .nav {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.75rem;
-    }
-
-    .nav-links {
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
+     ══════════════════════════════════════ */
+  @media (max-width: 860px) {
     .hero {
-      padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(2rem, 4vw, 3rem);
-    }
-
-    .hero-title {
-      font-size: var(--text-2xl);
-    }
-
-    .stat-row {
-      flex-direction: column;
-      gap: 0.4rem;
-      align-items: center;
-    }
-
-    .stat-sep {
-      display: none;
-    }
-
-    .top-bar {
-      display: none;
-    }
-
-    .services-grid {
       grid-template-columns: 1fr;
+      gap: 2rem;
+      padding: clamp(3rem, 6vw, 4rem) 0 clamp(2rem, 3vw, 2.5rem);
     }
 
-    .process-step {
-      grid-template-columns: auto 1fr;
+    .mod-6, .mod-8 { grid-column: span 12; }
+    .mod-4 { grid-column: span 6; }
+    .mod-3 { grid-column: span 6; }
+
+    .mission-body { grid-template-columns: 1fr 1fr; }
+
+    .cta-section {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
     }
 
-    .process-step-sep {
-      display: none;
-    }
+    .radar-container { display: none; }
+  }
 
-    .creator-card {
-      flex-direction: column;
-      text-align: center;
-    }
+  @media (max-width: 560px) {
+    .nav-meta { display: none; }
+
+    .hero-title { font-size: clamp(2rem, 9vw, 2.75rem); }
+
+    .mod-4, .mod-3 { grid-column: span 12; }
+
+    .mission-body { grid-template-columns: 1fr; }
+
+    .ticker-item { padding: 0.5rem 1rem; font-size: 0.5rem; }
 
     .footer {
       flex-direction: column;
+      gap: 0.5rem;
       text-align: center;
-      gap: 1rem;
     }
-
-    .footer-left {
-      justify-content: center;
-    }
-
-    .cta-heading {
-      font-size: var(--text-xl);
-    }
+    .footer-left { justify-content: center; }
   }
 </style>
 </head>
 <body>
 
-<div class="page-container">
+<!-- Radar decoration -->
+<div class="radar-container" aria-hidden="true">
+  <div class="radar-ring"></div>
+  <div class="radar-ring"></div>
+  <div class="radar-ring"></div>
+  <div class="radar-cross-h"></div>
+  <div class="radar-cross-v"></div>
+  <div class="radar-sweep"></div>
+  <div class="radar-dot" style="top:25%;left:62%"></div>
+  <div class="radar-dot" style="top:68%;left:35%;animation-delay:0.7s"></div>
+  <div class="radar-dot" style="top:40%;left:78%;animation-delay:1.4s"></div>
+</div>
 
+<div class="page">
 
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <span class="nav-mark"></span>
+      <em>Engine Room</em>&nbsp;Agency
+    </div>
+    <ul class="nav-meta">
+      <li><a href="#services">services</a></li>
+      <li><a href="#process">process</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+    <div class="nav-status">
+      <span class="nav-status-dot"></span>
+      sys.online
+    </div>
+  </nav>
 
   <!-- Hero -->
   <section class="hero" id="hero">
-    <div class="hero-prompt" aria-hidden="true">
-      <span class="hero-prompt-symbol">$</span>
-      <span>era describe</span>
-      <span class="hero-prompt-path">--agency</span>
+    <div class="hero-left">
+      <div class="hero-status reveal">
+        <span class="status-dot"></span>
+        systems online
+      </div>
+
+      <h1 class="hero-title reveal reveal-d1" id="heroTitle" aria-label="Engine Room Agency">
+        <span class="accent">Engine<br>Room</span><br>Agency
+      </h1>
+
+      <p class="hero-tagline reveal reveal-d2">
+        Serving the world's <strong>best</strong> gamer-creators.<span class="cursor-blink"></span>
+      </p>
+
+      <a href="https://discord.gg/ggtSAFmg" class="hero-cta reveal reveal-d3">Get in touch</a>
     </div>
 
-    <h1 class="hero-title">
-      <span class="highlight">Engine Room</span> Agency
-    </h1>
-
-    <p class="hero-tagline">
-      <span class="typewriter"></span>
-    </p>
-
-    <a href="https://discord.gg/ggtSAFmg" class="hero-cta">contact</a>
+    <div class="hero-panel hud reveal reveal-d2">
+      <div class="panel-header">
+        <span class="label">sys.status</span>
+        <span>live</span>
+      </div>
+      <div class="panel-row">
+        <span class="panel-key">vertical</span>
+        <span class="panel-val">Gaming</span>
+      </div>
+      <div class="panel-row">
+        <span class="panel-key">clients</span>
+        <span class="panel-val">Creators <span class="dim">/ streamers</span></span>
+      </div>
+      <div class="panel-row">
+        <span class="panel-key">intake</span>
+        <span class="panel-val">Open</span>
+      </div>
+      <div class="panel-row">
+        <span class="panel-key">stack</span>
+        <span class="panel-val">Full <span class="dim">/ custom</span></span>
+      </div>
+      <div class="panel-row">
+        <span class="panel-key">uptime</span>
+        <span class="panel-val">99.9<span class="dim">%</span></span>
+      </div>
+      <div class="panel-row">
+        <span class="panel-key">response</span>
+        <span class="panel-val">48h <span class="dim">max</span></span>
+      </div>
+    </div>
   </section>
 
-  <!-- Stats -->
-  <div id="pillars" class="stat-row" role="list" aria-label="Agency stats">
-    <div class="stat-item" role="listitem">
-      <span class="stat-value">Growth</span>
-    </div>
-    <span class="stat-sep" aria-hidden="true">|</span>
-    <div class="stat-item" role="listitem">
-      <span class="stat-value">Intelligence</span>
-    </div>
-    <span class="stat-sep" aria-hidden="true">|</span>
-    <div class="stat-item" role="listitem">
-      <span class="stat-value">Technology</span>
-    </div>
-    <span class="stat-sep" aria-hidden="true">|</span>
-    <div class="stat-item" role="listitem">
-      <span class="stat-value">Community</span>
-    </div>
-    <span class="stat-sep" aria-hidden="true">|</span>
-    <div class="stat-item" role="listitem">
-      <span class="stat-value">Experiences</span>
+  <!-- Ticker -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track" id="tickerTrack">
+      <!-- Duplicated for seamless loop -->
     </div>
   </div>
 
-  <!-- What We Do -->
+  <!-- Services -->
   <section class="section" id="services">
-    <div class="section-header">
-      <p class="section-comment">intelligence + technology = eye-catching growth</p>
-      <h2 class="section-title">What We Build</h2>
+    <div class="section-head reveal">
+      <span class="section-tag">// 01 Systems</span>
+      <div class="section-line"></div>
+      <span class="section-title">What We Build</span>
     </div>
 
-    <div class="services-grid">
-      <div class="service-item">
-        <div class="service-label">Technology</div>
-        <div class="service-title">Branded Experiences</div>
-        <div class="service-desc">Right experience. Built fast. Unmistakably you. We figure out what your community needs, ship it quickly, and make sure your brand is the loudest thing in the room.</div>
+    <div class="mod-grid">
+      <div class="mod mod-8 mod-lg mod-feature hud reveal">
+        <div class="mod-status"><span class="mod-status-dot active"></span> online</div>
+        <span class="mod-tag">sys.technology</span>
+        <h3 class="mod-title mod-title-lg">Branded Experiences</h3>
+        <p class="mod-desc">We study your community, find the right experience, and build it with care. Distilled from your brand, served to your community.</p>
+        <span class="mod-metric">latency: &lt;200ms // custom stack</span>
       </div>
-      <div class="service-item">
-        <div class="service-label">Intelligence</div>
-        <div class="service-title">Data That Drives Decisions</div>
-        <div class="service-desc">We start measuring before we ever jump on Discord. A mix of internal and external tools that x-ray your brand top to bottom — and we share every report with you. No secrets.</div>
+      <div class="mod mod-4 mod-lg reveal reveal-d1">
+        <div class="mod-status"><span class="mod-status-dot active"></span> active</div>
+        <span class="mod-tag">sys.intelligence</span>
+        <h3 class="mod-title mod-title-lg">Data That Drives Decisions</h3>
+        <p class="mod-desc">Internal and external tools that x-ray your brand top to bottom. Every report is yours.</p>
+        <span class="mod-metric">x-ray // full transparency</span>
       </div>
-      <div class="service-item">
-        <div class="service-label">Growth</div>
-        <div class="service-title">Explosive, Not Incremental</div>
-        <div class="service-desc">Intelligence tells us where the leverage is. Technology lets us pull the lever. The result: growth that snowballs — not growth that melts.</div>
+      <div class="mod mod-4 reveal reveal-d1">
+        <span class="mod-tag">sys.growth</span>
+        <h3 class="mod-title">Explosive Growth</h3>
+        <p class="mod-desc">Intelligence tells us where the leverage is. Technology pulls the lever. Growth that snowballs.</p>
       </div>
-      <div class="service-item">
-        <div class="service-label">Technology</div>
-        <div class="service-title">Discord, Twitch, Game APIs</div>
-        <div class="service-desc">Deep integrations with the tools your community already lives in. Auth, events, match data — all wired together.</div>
+      <div class="mod mod-4 reveal reveal-d2">
+        <span class="mod-tag">sys.integrations</span>
+        <h3 class="mod-title">Discord / Twitch / Game APIs</h3>
+        <p class="mod-desc">Deep integrations with the tools your community lives in. Auth, events, match data — wired together.</p>
       </div>
-      <div class="service-item">
-        <div class="service-label">Technology</div>
-        <div class="service-title">Built Like It Matters</div>
-        <div class="service-desc">Stable, scalable, obsessively monitored. When your community shows up, the tech has to be there. Period. We don't roll dice with your reputation or with ours.</div>
+      <div class="mod mod-4 reveal reveal-d3">
+        <span class="mod-tag">sys.reliability</span>
+        <h3 class="mod-title">Built Like It Matters</h3>
+        <p class="mod-desc">Stable, scalable, obsessively monitored. No dice with your reputation or ours.</p>
       </div>
-      <div class="service-item">
-        <div class="service-label">Growth</div>
-        <div class="service-title">Growth Is Everything</div>
-        <div class="service-desc">We only sign creators when we can see something compelling, eyeball-grabbing, community-igniting, and of course... culturally aligned on the other side.</div>
+      <div class="mod mod-12 reveal reveal-d2">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;flex-direction:column;gap:0.25rem">
+            <span class="mod-tag">sys.transparency</span>
+            <h3 class="mod-title">No Secrets</h3>
+          </div>
+          <span style="font-family:var(--mono);font-size:0.625rem;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase">Every report. Every metric. Every insight. Yours.</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- How It Works -->
+  <!-- Process -->
   <section class="section" id="process">
-    <div class="section-header">
-      <p class="section-comment">vim process.log</p>
-      <h2 class="section-title">How We Work</h2>
+    <div class="section-head reveal">
+      <span class="section-tag">// 02 Sequence</span>
+      <div class="section-line"></div>
+      <span class="section-title">How We Work</span>
     </div>
 
-    <div class="process-terminal" role="list" aria-label="Process steps">
-      <div class="process-titlebar" aria-hidden="true">
-        <div class="process-titlebar-dots">
-          <div class="process-titlebar-dot"></div>
-          <div class="process-titlebar-dot"></div>
-          <div class="process-titlebar-dot"></div>
+    <div class="mission hud reveal">
+      <div class="mission-bar">
+        <div class="mission-bar-left">
+          <span class="mission-bar-dot"></span>
+          engagement.sequence
         </div>
-        <span>process.log [+] — VIM</span>
+        <span>6 phases</span>
       </div>
-      <div class="process-body">
-        <div class="process-step" role="listitem">
-          <span class="process-step-num">00</span>
-          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
-          <span class="process-step-text">We review you <span class="dim">// application or referral</span></span>
+
+      <div class="mission-progress" id="missionProgress">
+        <div class="mission-pip filled"></div>
+        <div class="mission-pip filled"></div>
+        <div class="mission-pip filled"></div>
+        <div class="mission-pip filled"></div>
+        <div class="mission-pip filled"></div>
+        <div class="mission-pip filled"></div>
+      </div>
+
+      <div class="mission-body">
+        <div class="mission-step">
+          <div class="step-header">
+            <span class="step-num">00</span>
+            <span class="step-dot"></span>
+          </div>
+          <h3 class="step-title">We review you</h3>
+          <p class="step-desc">Application or referral. We look at your community, your content, your trajectory.</p>
+          <span class="step-note">// mutual fit</span>
         </div>
-        <div class="process-step" role="listitem">
-          <span class="process-step-num">01</span>
-          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
-          <span class="process-step-text">You review us <span class="dim">// do you like us? our terms?</span></span>
+        <div class="mission-step">
+          <div class="step-header">
+            <span class="step-num">01</span>
+            <span class="step-dot"></span>
+          </div>
+          <h3 class="step-title">You review us</h3>
+          <p class="step-desc">Do you like us? Our terms? This goes both ways.</p>
+          <span class="step-note">// mutual fit</span>
         </div>
-        <div class="process-step" role="listitem">
-          <span class="process-step-num">02</span>
-          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
-          <span class="process-step-text">We join your world <span class="dim">// discord, twitch, everything</span></span>
+        <div class="mission-step">
+          <div class="step-header">
+            <span class="step-num">02</span>
+            <span class="step-dot"></span>
+          </div>
+          <h3 class="step-title">We join your world</h3>
+          <p class="step-desc">Discord, Twitch, everything. We embed before we build.</p>
+          <span class="step-note">// full immersion</span>
         </div>
-        <div class="process-step" role="listitem">
-          <span class="process-step-num">03</span>
-          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
-          <span class="process-step-text">We decide the experience <span class="dim">// together, not for you</span></span>
+        <div class="mission-step">
+          <div class="step-header">
+            <span class="step-num">03</span>
+            <span class="step-dot"></span>
+          </div>
+          <h3 class="step-title">We decide the experience</h3>
+          <p class="step-desc">Together, not for you. Your community. Your voice. Our tech.</p>
+          <span class="step-note">// collaborative</span>
         </div>
-        <div class="process-step" role="listitem">
-          <span class="process-step-num">04</span>
-          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
-          <span class="process-step-text">We launch <span class="dim">// promote, execute, measure</span></span>
+        <div class="mission-step">
+          <div class="step-header">
+            <span class="step-num">04</span>
+            <span class="step-dot"></span>
+          </div>
+          <h3 class="step-title">We launch</h3>
+          <p class="step-desc">Promote, execute, measure. Everything instrumented from day one.</p>
+          <span class="step-note">// data from start</span>
         </div>
-        <div class="process-step" role="listitem">
-          <span class="process-step-num">05</span>
-          <span class="process-step-sep" aria-hidden="true">&mdash;</span>
-          <span class="process-step-text">We iterate <span class="dim">// look back before looking forward</span><span class="cursor-blink"></span></span>
+        <div class="mission-step">
+          <div class="step-header">
+            <span class="step-num">05</span>
+            <span class="step-dot"></span>
+          </div>
+          <h3 class="step-title">We iterate</h3>
+          <p class="step-desc">Look back before looking forward. Compound what works. Cut what doesn't.</p>
+          <span class="step-note">// continuous loop</span>
         </div>
       </div>
-      <div class="vim-statusbar">
-        <span><span class="vim-mode">-- NORMAL --</span></span>
-        <span>process.log 6L, 248B</span>
+
+      <div class="mission-footer">
+        <span class="mission-footer-status">status: ready</span>
+        <span>engine-room-agency // v0.3.0</span>
       </div>
     </div>
   </section>
-
 
   <!-- CTA -->
-  <section class="section cta-section" id="contact">
-    <div class="cta-command" aria-hidden="true">
-      <span class="symbol">$</span> era grow --creator
-    </div>
-
-    <h2 class="cta-heading">
-      Let's build something<br>they'll talk about.
+  <section class="cta-section" id="contact">
+    <h2 class="cta-heading reveal">
+      Let's build<br>something they'll<br><span class="accent">talk about.</span>
     </h2>
-
-    <p class="cta-sub">
-      Intelligence and technology for gamer-creators who are ready for eye-catching growth.
-    </p>
-
-    <a href="https://discord.gg/ggtSAFmg" class="cta-button" aria-label="Contact Engine Room Agency">
-      contact
-    </a>
-
-    <p class="cta-note">Selective intake. We'll respond within 48 hours.</p>
+    <div class="cta-right">
+      <p class="cta-text reveal reveal-d1">Intelligence and technology for gamer-creators who are ready for growth that actually compounds.</p>
+      <a href="https://discord.gg/ggtSAFmg" class="cta-btn reveal reveal-d2">Get in touch</a>
+      <span class="cta-note reveal reveal-d3">48h response.</span>
+    </div>
   </section>
 
   <!-- Footer -->
   <footer class="footer">
     <div class="footer-left">
-      <div class="footer-status" aria-label="System online"></div>
-      <span>era v0.1.0 // engine-room-agency.com</span>
+      <span class="footer-dot"></span>
+      <span>era v0.3.0 // engine-room-agency.com</span>
     </div>
     <div>
-      <a href="#">terms</a> &middot; <a href="#">privacy</a> &middot; <a href="#">discord</a>
+      <a href="#">terms</a> &middot; <a href="#">privacy</a> &middot; <a href="https://discord.gg/ggtSAFmg">discord</a>
     </div>
   </footer>
 
 </div>
 
 <script>
-  const el = document.querySelector('.typewriter');
-  const prefix = 'Serving the world\'s ';
-  const rejects = ['biggest', 'most popular'];
-  const final = 'best';
-  const suffix = ' gamer-creators.';
+  // ── Text scramble effect on hero title ──
+  (function() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
+    const title = document.getElementById('heroTitle');
+    if (!title || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const typeSpeed = 60;
-  const deleteSpeed = 40;
-  const pauseBeforeDelete = 400;
-  const pauseAfterDelete = 200;
+    const spans = [];
+    const lines = title.querySelectorAll('.accent, br');
+    const originalHTML = title.innerHTML;
 
-  let current = '';
+    // Parse text nodes and wrap each character
+    function wrapChars(node) {
+      const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null);
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
 
-  function render(base, bold) {
-    if (bold) {
-      el.innerHTML = base.slice(0, prefix.length) + '<strong>' + base.slice(prefix.length) + '</strong>';
-    } else {
-      el.innerHTML = base;
-    }
-  }
-
-  async function sleep(ms) {
-    return new Promise(r => setTimeout(r, ms));
-  }
-
-  async function typeText(text) {
-    for (let i = 0; i < text.length; i++) {
-      current += text[i];
-      render(current, false);
-      await sleep(typeSpeed);
-    }
-  }
-
-  async function deleteChars(count) {
-    for (let i = 0; i < count; i++) {
-      current = current.slice(0, -1);
-      render(current, false);
-      await sleep(deleteSpeed);
-    }
-  }
-
-  async function run() {
-    await sleep(600);
-    await typeText(prefix);
-
-    for (const word of rejects) {
-      await typeText(word);
-      await sleep(pauseBeforeDelete);
-      await deleteChars(word.length);
-      await sleep(pauseAfterDelete);
+      textNodes.forEach(tn => {
+        const frag = document.createDocumentFragment();
+        const text = tn.textContent;
+        for (let i = 0; i < text.length; i++) {
+          if (text[i] === ' ' || text[i] === '\n') {
+            frag.appendChild(document.createTextNode(text[i]));
+          } else {
+            const s = document.createElement('span');
+            s.className = 'char scramble-text';
+            s.dataset.final = text[i];
+            s.textContent = chars[Math.floor(Math.random() * chars.length)];
+            spans.push(s);
+            frag.appendChild(s);
+          }
+        }
+        tn.parentNode.replaceChild(frag, tn);
+      });
     }
 
-    await typeText(final + suffix);
-    render(prefix + final + suffix, true);
-  }
+    wrapChars(title);
 
-  run();
+    // Scramble then resolve each character with stagger
+    let frame = 0;
+    const scrambleDuration = 8; // frames of scramble per char
+    const stagger = 2; // frames between each char starting resolve
+
+    function animate() {
+      let allDone = true;
+      spans.forEach((s, i) => {
+        const startFrame = i * stagger;
+        if (frame < startFrame) {
+          // Still scrambling
+          s.textContent = chars[Math.floor(Math.random() * chars.length)];
+          allDone = false;
+        } else if (frame < startFrame + scrambleDuration) {
+          // Resolving phase — still cycling
+          s.textContent = chars[Math.floor(Math.random() * chars.length)];
+          s.classList.add('resolving');
+          allDone = false;
+        } else {
+          // Resolved
+          s.textContent = s.dataset.final;
+          s.classList.remove('resolving');
+          s.classList.add('resolved');
+        }
+      });
+      frame++;
+      if (!allDone) requestAnimationFrame(animate);
+    }
+
+    // Start after a beat
+    setTimeout(() => requestAnimationFrame(animate), 400);
+  })();
+
+  // ── Ticker data ──
+  (function() {
+    const data = [
+      { label: 'portfolio', val: 'Available' },
+      { label: 'creed', val: 'Trust Intuition But Verify With Data' },
+      { label: 'attitude', val: 'Believe Slowly Build Quickly' },
+      { label: 'technical.depth', val: 'Legendary', dot: 'live' },
+      { label: 'accountability', val: 'Maximal' },
+      { label: 'goal.first', val: 'Growth', dot: 'live' },
+      { label: 'goal.second', val: 'Growth', dot: 'live' },
+    ];
+
+    const track = document.getElementById('tickerTrack');
+    if (!track) return;
+
+    // Build ticker items x2 for seamless loop
+    function buildItems() {
+      return data.map(d => {
+        const dot = d.dot ? `<span class="dot ${d.dot}"></span>` : '<span class="dot"></span>';
+        return `<span class="ticker-item">${dot} ${d.label} <span class="val">${d.val}</span></span>`;
+      }).join('');
+    }
+
+    track.innerHTML = buildItems() + buildItems();
+  })();
+
+  // ── Mission progress animation ──
+  (function() {
+    const pips = document.querySelectorAll('.mission-pip');
+    if (!pips.length) return;
+
+    // Initially unfilled, fill on scroll
+    pips.forEach(p => p.classList.remove('filled'));
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          pips.forEach((p, i) => {
+            setTimeout(() => p.classList.add('filled'), i * 120);
+          });
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    observer.observe(document.getElementById('missionProgress'));
+  })();
+
+  // ── Scroll reveal ──
+  (function() {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  })();
 </script>
 </body>
 </html>
