@@ -90,7 +90,6 @@
       transition-duration: 0.01ms !important;
     }
     .reveal { opacity: 1 !important; transform: none !important; }
-    .ticker-track { animation: none !important; }
   }
 
   /* ── Focus ── */
@@ -427,56 +426,30 @@
   /* ══════════════════════════════════════
      TICKER — horizontal data strip
      ══════════════════════════════════════ */
-  .ticker {
+  .pillars {
+    display: flex;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    overflow: hidden;
-    background: var(--bg-base);
-    position: relative;
-  }
-
-  .ticker-track {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    white-space: nowrap;
-    animation: tickerScroll 30s linear infinite;
-    width: max-content;
-  }
-
-  @keyframes tickerScroll {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  .ticker-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    padding: 0.5rem 1.5rem;
     font-family: var(--mono);
-    font-size: 0.5625rem;
-    letter-spacing: 0.1em;
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--text-muted);
+  }
+
+  .pillar {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem 0;
     border-right: 1px solid var(--border);
-    flex-shrink: 0;
+    transition: color 0.15s ease, background 0.15s ease;
   }
 
-  .ticker-item .val {
-    color: var(--text-primary);
-    font-weight: 600;
-  }
+  .pillar:last-child { border-right: none; }
 
-  .ticker-item .dot {
-    width: 4px; height: 4px;
-    background: var(--accent-dim);
-    border-radius: 50%;
-  }
-
-  .ticker-item .dot.live {
-    background: var(--accent);
-    animation: pulse 2s ease infinite;
+  .pillar:hover {
+    color: var(--accent);
+    background: var(--accent-glow);
   }
 
   /* ══════════════════════════════════════
@@ -519,7 +492,7 @@
   /* Module grid */
   .mod-grid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
+    grid-template-columns: 2fr 1fr;
     gap: 1px;
     background: var(--border);
     border: 1px solid var(--border);
@@ -527,11 +500,11 @@
 
   .mod {
     background: var(--bg-surface);
-    padding: 0.875rem 1rem;
+    padding: 1.25rem 1.125rem;
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
   }
 
@@ -539,16 +512,19 @@
     background: var(--bg-raised);
   }
 
-  .mod-6 { grid-column: span 6; }
-  .mod-4 { grid-column: span 4; }
-  .mod-8 { grid-column: span 8; }
-  .mod-3 { grid-column: span 3; }
-  .mod-12 { grid-column: span 12; }
-
-  .mod-lg {
-    padding: 1.25rem 1.125rem;
-    min-height: 160px;
+  .mod-hero {
+    grid-column: 1 / -1;
+    padding: 1.75rem 1.5rem;
+    min-height: 180px;
     justify-content: flex-end;
+  }
+
+  .mod-wide {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    align-items: end;
   }
 
   /* Status indicator on modules */
@@ -592,14 +568,14 @@
   }
 
   .mod-title-lg {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
   }
 
   .mod-desc {
     font-size: 0.8125rem;
     color: var(--text-secondary);
     line-height: 1.6;
-    max-width: 48ch;
+    max-width: 52ch;
   }
 
   .mod-metric {
@@ -612,22 +588,6 @@
     padding-top: 0.5rem;
   }
 
-  /* Feature module — has accent gradient hint */
-  .mod-feature {
-    position: relative;
-    overflow: hidden;
-  }
-  .mod-feature::after {
-    content: '';
-    position: absolute;
-    bottom: 0; right: 0;
-    width: 40%; height: 40%;
-    background: radial-gradient(ellipse at bottom right, var(--accent-glow), transparent);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  .mod-feature:hover::after { opacity: 1; }
 
   /* ══════════════════════════════════════
      PROCESS — mission sequence
@@ -881,8 +841,8 @@
       padding: clamp(3rem, 6vw, 4rem) 0 clamp(2rem, 3vw, 2.5rem);
     }
 
-    .mod-6, .mod-8 { grid-column: span 12; }
-    .mod-4 { grid-column: span 6; }
+    .mod-grid { grid-template-columns: 1fr; }
+    .mod-wide { grid-template-columns: 1fr; }
     .mod-3 { grid-column: span 6; }
 
     .mission-body { grid-template-columns: 1fr 1fr; }
@@ -904,7 +864,9 @@
 
     .mission-body { grid-template-columns: 1fr; }
 
-    .ticker-item { padding: 0.5rem 1rem; font-size: 0.5rem; }
+    .pillars { flex-wrap: wrap; }
+    .pillar { flex: none; width: 50%; border-bottom: 1px solid var(--border); }
+    .pillar:last-child { width: 100%; }
 
     .footer {
       flex-direction: column;
@@ -1000,11 +962,13 @@
     </div>
   </section>
 
-  <!-- Ticker -->
-  <div class="ticker" aria-hidden="true">
-    <div class="ticker-track" id="tickerTrack">
-      <!-- Duplicated for seamless loop -->
-    </div>
+  <!-- Pillars -->
+  <div class="pillars">
+    <div class="pillar">Growth</div>
+    <div class="pillar">Intelligence</div>
+    <div class="pillar">Technology</div>
+    <div class="pillar">Community</div>
+    <div class="pillar">Experiences</div>
   </div>
 
   <!-- Services -->
@@ -1016,43 +980,43 @@
     </div>
 
     <div class="mod-grid">
-      <div class="mod mod-8 mod-lg mod-feature hud reveal">
-        <div class="mod-status"><span class="mod-status-dot active"></span> online</div>
+      <div class="mod mod-hero mod-feature hud reveal">
         <span class="mod-tag">sys.technology</span>
         <h3 class="mod-title mod-title-lg">Branded Experiences</h3>
         <p class="mod-desc">We study your community, find the right experience, and build it with care. Distilled from your brand, served to your community.</p>
         <span class="mod-metric">latency: &lt;200ms // custom stack</span>
       </div>
-      <div class="mod mod-4 mod-lg reveal reveal-d1">
-        <div class="mod-status"><span class="mod-status-dot active"></span> active</div>
+      <div class="mod reveal reveal-d1">
         <span class="mod-tag">sys.intelligence</span>
-        <h3 class="mod-title mod-title-lg">Data That Drives Decisions</h3>
-        <p class="mod-desc">Internal and external tools that x-ray your brand top to bottom. Every report is yours.</p>
+        <h3 class="mod-title">Data That Drives Decisions</h3>
+        <p class="mod-desc">Internal and external tools that x-ray your brand top to bottom. No secrets. Every report, every metric, every insight — yours.</p>
         <span class="mod-metric">x-ray // full transparency</span>
       </div>
-      <div class="mod mod-4 reveal reveal-d1">
+      <div class="mod reveal reveal-d2">
         <span class="mod-tag">sys.growth</span>
         <h3 class="mod-title">Explosive Growth</h3>
         <p class="mod-desc">Intelligence tells us where the leverage is. Technology pulls the lever. Growth that snowballs.</p>
+        <span class="mod-metric">model: compounding</span>
       </div>
-      <div class="mod mod-4 reveal reveal-d2">
-        <span class="mod-tag">sys.integrations</span>
-        <h3 class="mod-title">Discord / Twitch / Game APIs</h3>
-        <p class="mod-desc">Deep integrations with the tools your community lives in. Auth, events, match data — wired together.</p>
+      <div class="mod mod-wide reveal reveal-d2">
+        <div>
+          <span class="mod-tag">sys.integrations</span>
+          <h3 class="mod-title">Discord / Twitch / Game APIs</h3>
+          <p class="mod-desc">Deep integrations with the tools your community lives in. Auth, events, match data — wired together.</p>
+        </div>
+        <span class="mod-metric">3 live apis // realtime events</span>
       </div>
-      <div class="mod mod-4 reveal reveal-d3">
+      <div class="mod reveal reveal-d3">
         <span class="mod-tag">sys.reliability</span>
         <h3 class="mod-title">Built Like It Matters</h3>
         <p class="mod-desc">Stable, scalable, obsessively monitored. No dice with your reputation or ours.</p>
+        <span class="mod-metric">uptime: 99.97% // 24/7 monitoring</span>
       </div>
-      <div class="mod mod-12 reveal reveal-d2">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="display:flex;flex-direction:column;gap:0.25rem">
-            <span class="mod-tag">sys.transparency</span>
-            <h3 class="mod-title">No Secrets</h3>
-          </div>
-          <span style="font-family:var(--mono);font-size:0.625rem;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase">Every report. Every metric. Every insight. Yours.</span>
-        </div>
+      <div class="mod reveal reveal-d4">
+        <span class="mod-tag">sys.growth</span>
+        <h3 class="mod-title">Compounding, Not Linear</h3>
+        <p class="mod-desc">We only sign creators when we can see something worth building on the other side.</p>
+        <span class="mod-metric">long-term // no quick fixes</span>
       </div>
     </div>
   </section>
@@ -1084,7 +1048,7 @@
       </div>
 
       <div class="mission-body">
-        <div class="mission-step">
+        <div class="mission-step" data-step="0">
           <div class="step-header">
             <span class="step-num">00</span>
             <span class="step-dot"></span>
@@ -1093,7 +1057,7 @@
           <p class="step-desc">Application or referral. We look at your community, your content, your trajectory.</p>
           <span class="step-note">// mutual fit</span>
         </div>
-        <div class="mission-step">
+        <div class="mission-step" data-step="1">
           <div class="step-header">
             <span class="step-num">01</span>
             <span class="step-dot"></span>
@@ -1102,7 +1066,7 @@
           <p class="step-desc">Do you like us? Our terms? This goes both ways.</p>
           <span class="step-note">// mutual fit</span>
         </div>
-        <div class="mission-step">
+        <div class="mission-step" data-step="2">
           <div class="step-header">
             <span class="step-num">02</span>
             <span class="step-dot"></span>
@@ -1111,7 +1075,7 @@
           <p class="step-desc">Discord, Twitch, everything. We embed before we build.</p>
           <span class="step-note">// full immersion</span>
         </div>
-        <div class="mission-step">
+        <div class="mission-step" data-step="3">
           <div class="step-header">
             <span class="step-num">03</span>
             <span class="step-dot"></span>
@@ -1120,7 +1084,7 @@
           <p class="step-desc">Together, not for you. Your community. Your voice. Our tech.</p>
           <span class="step-note">// collaborative</span>
         </div>
-        <div class="mission-step">
+        <div class="mission-step" data-step="4">
           <div class="step-header">
             <span class="step-num">04</span>
             <span class="step-dot"></span>
@@ -1129,7 +1093,7 @@
           <p class="step-desc">Promote, execute, measure. Everything instrumented from day one.</p>
           <span class="step-note">// data from start</span>
         </div>
-        <div class="mission-step">
+        <div class="mission-step" data-step="5">
           <div class="step-header">
             <span class="step-num">05</span>
             <span class="step-dot"></span>
@@ -1150,10 +1114,10 @@
   <!-- CTA -->
   <section class="cta-section" id="contact">
     <h2 class="cta-heading reveal">
-      Let's build<br>something they'll<br><span class="accent">talk about.</span>
+      You've done<br>the hard part.<br><span class="accent">Let us tune the<br>growth engine.</span>
     </h2>
     <div class="cta-right">
-      <p class="cta-text reveal reveal-d1">Intelligence and technology for gamer-creators who are ready for growth that actually compounds.</p>
+      <p class="cta-text reveal reveal-d1">Intelligence, technology, and investment for gamer-creators who are ready for their next era.</p>
       <a href="https://discord.gg/ggtSAFmg" class="cta-btn reveal reveal-d2">Get in touch</a>
       <span class="cta-note reveal reveal-d3">48h response.</span>
     </div>
@@ -1243,52 +1207,29 @@
     setTimeout(() => requestAnimationFrame(animate), 400);
   })();
 
-  // ── Ticker data ──
-  (function() {
-    const data = [
-      { label: 'portfolio', val: 'Available' },
-      { label: 'creed', val: 'Trust Intuition But Verify With Data' },
-      { label: 'attitude', val: 'Believe Slowly Build Quickly' },
-      { label: 'technical.depth', val: 'Legendary', dot: 'live' },
-      { label: 'accountability', val: 'Maximal' },
-      { label: 'goal.first', val: 'Growth', dot: 'live' },
-      { label: 'goal.second', val: 'Growth', dot: 'live' },
-    ];
 
-    const track = document.getElementById('tickerTrack');
-    if (!track) return;
-
-    // Build ticker items x2 for seamless loop
-    function buildItems() {
-      return data.map(d => {
-        const dot = d.dot ? `<span class="dot ${d.dot}"></span>` : '<span class="dot"></span>';
-        return `<span class="ticker-item">${dot} ${d.label} <span class="val">${d.val}</span></span>`;
-      }).join('');
-    }
-
-    track.innerHTML = buildItems() + buildItems();
-  })();
-
-  // ── Mission progress animation ──
+  // ── Mission progress — pips follow hovered step ──
   (function() {
     const pips = document.querySelectorAll('.mission-pip');
-    if (!pips.length) return;
+    const steps = document.querySelectorAll('.mission-step');
+    if (!pips.length || !steps.length) return;
 
-    // Initially unfilled, fill on scroll
     pips.forEach(p => p.classList.remove('filled'));
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          pips.forEach((p, i) => {
-            setTimeout(() => p.classList.add('filled'), i * 120);
-          });
-          observer.unobserve(e.target);
-        }
+    steps.forEach(step => {
+      step.addEventListener('mouseenter', () => {
+        const idx = parseInt(step.dataset.step, 10);
+        pips.forEach((p, i) => {
+          p.classList.toggle('filled', i <= idx);
+        });
       });
-    }, { threshold: 0.3 });
+    });
 
-    observer.observe(document.getElementById('missionProgress'));
+    // Reset all on mouse leave from the grid
+    const body = document.querySelector('.mission-body');
+    body.addEventListener('mouseleave', () => {
+      pips.forEach(p => p.classList.remove('filled'));
+    });
   })();
 
   // ── Scroll reveal ──
