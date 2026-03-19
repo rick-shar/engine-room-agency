@@ -249,19 +249,6 @@
   }
   .nav-meta a:hover { color: var(--accent); }
 
-  .nav-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    color: var(--text-muted);
-  }
-
-  .nav-status-dot {
-    width: 5px; height: 5px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 2.5s ease infinite;
-  }
 
   /* ══════════════════════════════════════
      HERO — left-aligned, text scramble
@@ -341,12 +328,12 @@
 
   .cursor-blink {
     display: inline-block;
-    width: 0.55em;
-    height: 1.1em;
-    background: var(--accent);
-    vertical-align: text-bottom;
-    margin-left: 2px;
-    animation: blink 1s steps(1) infinite;
+    animation: cursor-cycle 1s steps(1) infinite;
+  }
+
+  @keyframes cursor-cycle {
+    0%, 100% { color: var(--text-primary); background: transparent; }
+    50% { color: transparent; background: var(--accent); width: 0.55em; height: 1.1em; vertical-align: text-bottom; }
   }
 
   .hero-cta {
@@ -905,10 +892,6 @@
       <li><a href="#process">process</a></li>
       <li><a href="#contact">contact</a></li>
     </ul>
-    <div class="nav-status">
-      <span class="nav-status-dot"></span>
-      sys.online
-    </div>
   </nav>
 
   <!-- Hero -->
@@ -924,7 +907,7 @@
       </h1>
 
       <p class="hero-tagline reveal reveal-d2">
-        Serving the world's <strong>best</strong> gamer-creators.<span class="cursor-blink"></span>
+        Serving the world's <strong>best</strong> gamer-creators<span class="cursor-blink">.</span>
       </p>
 
       <a href="https://discord.gg/ggtSAFmg" class="hero-cta reveal reveal-d3">Get in touch</a>
@@ -933,7 +916,7 @@
     <div class="hero-panel hud reveal reveal-d2">
       <div class="panel-header">
         <span class="label">sys.status</span>
-        <span>live</span>
+        <span>healthy</span>
       </div>
       <div class="panel-row">
         <span class="panel-key">vertical</span>
@@ -952,8 +935,8 @@
         <span class="panel-val">Full <span class="dim">/ custom</span></span>
       </div>
       <div class="panel-row">
-        <span class="panel-key">uptime</span>
-        <span class="panel-val">99.9<span class="dim">%</span></span>
+        <span class="panel-key">portfolio</span>
+        <span class="panel-val">Available</span>
       </div>
       <div class="panel-row">
         <span class="panel-key">response</span>
@@ -1114,7 +1097,7 @@
   <!-- CTA -->
   <section class="cta-section" id="contact">
     <h2 class="cta-heading reveal">
-      You've done<br>the hard part.<br><span class="accent">Let us tune the<br>growth engine.</span>
+      Lets tune the<br><span class="accent">growth engine.</span>
     </h2>
     <div class="cta-right">
       <p class="cta-text reveal reveal-d1">Intelligence, technology, and investment for gamer-creators who are ready for their next era.</p>
